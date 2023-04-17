@@ -4,7 +4,7 @@ save_path: /content/save/
 type_model: "CNN"
 n_hidden: 50
 patience: 5
-num_classes: 1
+n_out: 1
 batch_size: 256
 learning_rate: 0.001
 num_epochs: 100

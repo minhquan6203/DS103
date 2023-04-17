@@ -17,7 +17,7 @@ class Classify_task:
         self.n_hidden=config.n_hidden
         self.batch_size=config.batch_size
         self.learning_rate=config.learning_rate
-        self.num_classes=config.num_classes
+        self.n_out=config.n_out
         self.save_path=config.save_path
         self.dataloader=LoadData(config)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -27,7 +27,7 @@ class Classify_task:
           os.makedirs(self.save_path)
 
         train,valid,n_input = self.dataloader.load_data(data_path=self.train_path)
-        self.base_model = CNN_Model(n_inputs=n_input,n_hidden=self.n_hidden,num_classes=self.num_classes).to(self.device)
+        self.base_model = CNN_Model(n_inputs=n_input,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
         loss_function =nn.BCEWithLogitsLoss()
         optimizer = optim.Adam(self.base_model.parameters(), lr=self.learning_rate)
         if os.path.exists(os.path.join(self.save_path, 'last_model.pth')):

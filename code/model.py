@@ -5,11 +5,11 @@ import torchvision.models as models
 from torch.nn.init import kaiming_uniform_, xavier_uniform_
 
 class CNN_Model(nn.Module):
-    def __init__(self, n_inputs, n_hidden, num_classes):
+    def __init__(self, n_inputs, n_hidden, n_out):
         super(CNN_Model, self).__init__()
         self.n_inputs=n_inputs
         self.n_hidden=n_hidden
-        self.num_classes=num_classes
+        self.n_out=n_out
 
         self.h1 = nn.Linear(self.n_inputs, n_hidden)
         kaiming_uniform_(self.h1.weight, nonlinearity='relu')
@@ -21,7 +21,7 @@ class CNN_Model(nn.Module):
         self.a2 = nn.ReLU()
         self.d2 = nn.Dropout(p=0.1)
 
-        self.h3 = nn.Linear(n_hidden, num_classes)
+        self.h3 = nn.Linear(n_hidden, n_out)
         xavier_uniform_(self.h3.weight)
         self.a3 = nn.Sigmoid()
 
