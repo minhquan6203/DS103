@@ -56,9 +56,9 @@ class LoadData:
         return train_dl, val_dl, X_train.shape[1]
 
 
-    def load_test_data(self,path):
+    def load_test_data(self,data_path):
 
-        X = pd.read_pickle(path)
+        X = pd.read_pickle(data_path)
 
         scaler = StandardScaler()
         X_test = scaler.transform(X)

@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import os
 
-from model import CNN_Model
+from model import Model
 from loaddata import LoadData
 from sklearn.metrics import f1_score, confusion_matrix
 
