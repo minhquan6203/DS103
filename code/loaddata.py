@@ -53,7 +53,7 @@ class LoadData:
         train_dl = DataLoader(train_ds, batch_size=self.batch_size, shuffle=True)
         val_dl = DataLoader(val_ds, batch_size=self.batch_size, shuffle=False)
 
-        return train_dl, val_dl
+        return train_dl, val_dl, X_train.shape[1]
 
 
     def load_test_data(self,path):

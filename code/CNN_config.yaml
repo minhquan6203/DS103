@@ -1,13 +1,10 @@
-train_path: /content/Creatures/Train
-valid_path: /content/Creatures/Valid
+train_path: /content/ds103/data/intermediate/train1.pkl
 test_path: /content/Creatures/Valid
 save_path: /content/save/
 type_model: "CNN"
+n_hidden: 50
 patience: 5
-image_C: 3
-image_W: 224
-image_H: 224
-num_classes: 15
-batch_size: 128
+num_classes: 1
+batch_size: 256
 learning_rate: 0.001
 num_epochs: 100

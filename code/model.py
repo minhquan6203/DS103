@@ -2,27 +2,33 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.models as models
-from sklearn.svm import SVC
-from sklearn.cluster import KMeans
+from torch.nn.init import kaiming_uniform_, xavier_uniform_
 
-class CNN_Model(nn.Module): #this repo use ResNet34
-
-    def __init__(self, config):
+class CNN_Model(nn.Module):
+    def __init__(self, n_inputs, n_hidden, num_classes):
         super(CNN_Model, self).__init__()
-        self.num_classes = config.num_classes
-        self.resnet = models.resnet34(pretrained=False)
-        self.resnet.fc = nn.Linear(self.resnet.fc.in_features, self.num_classes)
+        self.n_inputs=n_inputs
+        self.n_hidden=n_hidden
+        self.num_classes=num_classes
 
-    def forward(self, x):
-        x = self.resnet(x)
-        x = torch.softmax(x, dim=1)
-        return x
+        self.h1 = nn.Linear(self.n_inputs, n_hidden)
+        kaiming_uniform_(self.h1.weight, nonlinearity='relu')
+        self.a1 = nn.ReLU()
+        self.b1 = nn.BatchNorm1d(n_hidden)
 
-class SVM_Model(nn.Module):
-    def __init__(self, config):
-        super(SVM_Model, self).__init__()
-        self.linear = nn.Linear(config.image_H * config.image_W * config.image_C, config.num_classes)
+        self.h2 = nn.Linear(n_hidden, n_hidden)
+        kaiming_uniform_(self.h2.weight, nonlinearity='relu')
+        self.a2 = nn.ReLU()
+        self.d2 = nn.Dropout(p=0.1)
 
-    def forward(self, x):
-        x = x.view(x.size(0), -1)
-        return self.linear(x)
+        self.h3 = nn.Linear(n_hidden, num_classes)
+        xavier_uniform_(self.h3.weight)
+        self.a3 = nn.Sigmoid()
+
+    def forward(self, inp):
+        out = self.a1(self.h1(inp))
+        out = self.b1(out)
+        out = self.a2(self.h2(out))
+        out = self.d2(out)
+        out = self.a3(self.h3(out))
+        return out
