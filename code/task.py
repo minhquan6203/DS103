@@ -27,7 +27,7 @@ class Classify_task:
           os.makedirs(self.save_path)
 
         train,valid,n_input = self.dataloader.load_data(data_path=self.train_path)
-        self.base_model = CNN_Model(n_inputs=n_input,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
+        self.base_model = Model(n_inputs=n_input,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
         loss_function =nn.BCEWithLogitsLoss()
         optimizer = optim.Adam(self.base_model.parameters(), lr=self.learning_rate)
         if os.path.exists(os.path.join(self.save_path, 'last_model.pth')):
