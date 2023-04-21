@@ -1,4 +1,4 @@
-train_path: /content/ds103/data/intermediate/train1.pkl
+train_path: /content/DS103/data/intermediate/train1.pkl
 test_path: /content/Creatures/Valid
 save_path: /content/save/
 type_model: "CNN"
