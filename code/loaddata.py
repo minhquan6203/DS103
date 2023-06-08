@@ -34,7 +34,7 @@ class LoadData:
     def load_data(self,data_path, does_scale=True):
 
         data = pd.read_pickle(data_path)
-        X = data.drop('label', axis=1)
+        X = data.drop('label', axis=1).drop('index',axis=1)
         y = data['label']
 
         X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=1)
@@ -56,13 +56,17 @@ class LoadData:
         return train_dl, val_dl, X_train.shape[1]
 
 
-    def load_test_data(self,data_path):
+    def load_test_data(self,data_path,does_scale=True):
 
-        X = pd.read_pickle(data_path)
-
-        scaler = StandardScaler()
-        X_test = scaler.transform(X)
-        test_ds = TestDataset(X_test)
-        test_dl = DataLoader(test_ds, batch_size=1)
+        data = pd.read_pickle(data_path)
+        X = data.drop('index',axis=1)
+        id = data['index']
+        if does_scale:
+            scaler = StandardScaler()
+            X= scaler.transform(X)
+        else:
+            scaler = None
+        test_ds = TestDataset(X)
+        test_dl = DataLoader(test_ds, batch_size=self.batch_size,shuffle=False)
         
-        return test_dl
+        return test_dl,id
