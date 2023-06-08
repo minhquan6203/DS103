@@ -1,5 +1,5 @@
-train_path: /content/DS103/data/intermediate/train1.pkl
-test_path: /content/Creatures/Valid
+train_path: ./train.pkl
+test_path: ./test.pkl
 save_path: /content/save/
 type_model: nn
 n_hidden: 50
