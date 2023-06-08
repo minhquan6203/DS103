@@ -23,6 +23,7 @@ class Classify_task:
         self.dataloader=LoadData(config)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.train,self.valid,self.n_input,self.scaler= self.dataloader.load_data(data_path=self.train_path)
+        print('n_input: ',self.n_input)
         if self.type_model=='nn':
             self.base_model = Model(n_inputs=self.n_input,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
         if self.type_model=='init':
@@ -138,7 +139,8 @@ class Classify_task:
             for inputs in test_data:
                 inputs = inputs.to(self.device)
                 output = self.base_model(inputs)
-                pred_labels.extend((output > 0.5).int().cpu().numpy())
+                preds=[out[0] for out in (output > 0.5).int().cpu().numpy()]
+                pred_labels.extend(preds)
                 data = {'index': id, 'label': pred_labels}
         df = pd.DataFrame(data)
         df.to_csv('./submission.csv', index=False)

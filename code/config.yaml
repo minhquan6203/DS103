@@ -2,9 +2,9 @@ train_path: ./train.pkl
 test_path: ./test.pkl
 save_path: /content/save/
 type_model: nn
-n_hidden: 50
+n_hidden: 64
 patience: 5
 n_out: 1
 batch_size: 256
-learning_rate: 0.001
+learning_rate: 0.0001
 num_epochs: 100
