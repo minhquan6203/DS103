@@ -1,6 +1,7 @@
 import torch.nn as nn
 from torch.nn.init import kaiming_uniform_, xavier_uniform_
-
+import torch
+import torch.nn.functional as F
 
 class Model(nn.Module):
     def __init__(self, n_inputs, n_hidden, n_out):
@@ -97,5 +98,3 @@ class Skip_Model(nn.Module):
         out += skip_out
         out = self.a3(self.h3(out))
         return out
-
-

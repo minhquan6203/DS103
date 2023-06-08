@@ -2,6 +2,12 @@ train_path: ./train.pkl
 test_path: ./test.pkl
 save_path: /content/save/
 type_model: nn
+#if model is svm
+gamma: 0.1
+r: 1
+degree: 2
+kernel_type: custom
+###################
 n_hidden: 64
 patience: 5
 n_out: 1
