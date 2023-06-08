@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import os
 
-from model import Model
+from model import Model,Model2,Skip_Model
 from loaddata import LoadData
 from sklearn.metrics import f1_score, confusion_matrix
 import pandas as pd
@@ -12,6 +12,7 @@ class Classify_task:
     def __init__(self, config):
         self.num_epochs=config.num_epochs
         self.patience=config.patience
+        self.type_model=config.type_model
         self.train_path=config.train_path
         self.test_path=config.test_path
         self.n_hidden=config.n_hidden
@@ -27,7 +28,12 @@ class Classify_task:
           os.makedirs(self.save_path)
 
         train,valid,n_input,self.scaler= self.dataloader.load_data(data_path=self.train_path)
-        self.base_model = Model(n_inputs=n_input,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
+        if self.type_model=='nn':
+            self.base_model = Model(n_inputs=n_input,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
+        if self.type_model=='init':
+            self.base_model = Model2(n_inputs=n_input,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
+        if self.type_model== 'skip':
+            return Skip_Model(n_inputs=n_input,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
         loss_function =nn.BCEWithLogitsLoss()
         optimizer = optim.Adam(self.base_model.parameters(), lr=self.learning_rate)
         if os.path.exists(os.path.join(self.save_path, 'last_model.pth')):
@@ -44,17 +50,18 @@ class Classify_task:
           
         if os.path.exists(os.path.join(self.save_path, 'best_model.pth')):
             checkpoint = torch.load(os.path.join(self.save_path, 'best_model.pth'))
-            best_valid_acc=checkpoint['valid_acc']
+            best_valid_f1=checkpoint['valid_f1']
         else:
-            best_valid_acc = 0.0
+            best_valid_f1 = 0.0
             
         threshold=0
         self.base_model.train()
+
         for epoch in range(initial_epoch, self.num_epochs + initial_epoch):
-            valid_acc=0.
-            train_acc=0.
-            train_loss=0.
-            valid_loss=0.
+            valid_f1 = 0.0
+            train_f1 = 0.0
+            train_loss = 0.0
+            valid_loss = 0.0
             for inputs, labels in train:
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
                 optimizer.zero_grad()
@@ -63,53 +70,55 @@ class Classify_task:
                 loss.backward()
                 optimizer.step()
                 train_loss += loss.item()
-                train_acc += ((output > 0.5).float() == labels).sum().item() / labels.size(0)
+                train_predictions = (output > 0.5).float()
+                train_f1 += f1_score(labels.cpu(), train_predictions.cpu())
 
             with torch.no_grad():
                 for inputs, labels in valid:
                     inputs, labels = inputs.to(self.device), labels.to(self.device)
                     output = self.base_model(inputs)
-
                     loss = loss_function(output, labels.float())
                     valid_loss += loss.item()
-                    valid_acc += ((output > 0.5).float() == labels).sum().item() / labels.size(0)
+                    valid_predictions = (output > 0.5).float()
+                    valid_f1 += f1_score(labels.cpu(), valid_predictions.cpu())
 
+    
             train_loss /= len(train)
-            train_acc /= len(train)
+            train_f1 /= len(train)
             valid_loss /= len(valid)
-            valid_acc /= len(valid)
+            valid_f1 /= len(valid)
 
-            print(f"epoch {epoch + 1}/{self.num_epochs + initial_epoch}")
-            print(f"train loss: {train_loss:.4f} train acc: {train_acc:.4f}")
-            print(f"valid loss: {valid_loss:.4f} valid acc: {valid_acc:.4f}")
+            print(f"Epoch {epoch + 1}:")
+            print(f"Train Loss: {train_loss:.4f} | Train F1-score: {train_f1:.4f}")
+            print(f"Valid Loss: {valid_loss:.4f} | Valid F1-score: {valid_f1:.4f}")
+
 
             # save the model state dict
             torch.save({
                 'epoch': epoch,
                 'model_state_dict': self.base_model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
-                'valid_acc': valid_acc,
-                'train_acc':train_acc,
+                'valid_f1': valid_f1,
+                'train_f1':train_f1,
                 'train_loss':train_loss,
                 'valid_loss':valid_loss}, os.path.join(self.save_path, 'last_model.pth'))
 
             # save the best model
-
-            if epoch > 0 and valid_acc < best_valid_acc:
+            if epoch > 0 and valid_f1 < best_valid_f1:
               threshold+=1
             else:
               threshold=0
-            if valid_acc > best_valid_acc:
-                best_valid_acc = valid_acc
+            if valid_f1 > best_valid_f1:
+                best_valid_f1 = valid_f1
                 torch.save({
                     'epoch': epoch,
                     'model_state_dict': self.base_model.state_dict(),
                     'optimizer_state_dict': optimizer.state_dict(),
-                    'valid_acc': valid_acc,
-                    'train_acc':train_acc,
+                    'valid_f1': valid_f1,
+                    'train_f1':train_f1,
                     'train_loss':train_loss,
                     'valid_loss':valid_loss}, os.path.join(self.save_path, 'best_model.pth'))
-                print(f"saved the best model with validation accuracy of {valid_acc:.4f}")
+                print(f"saved the best model with validation accuracy of {valid_f1:.4f}")
             
             # early stopping
             if threshold>=self.patience:
