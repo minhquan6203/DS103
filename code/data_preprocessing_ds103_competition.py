@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 import pickle
 
-
 def drop_col(df,list_col):
     for col in list_col:
         df=df.drop(col,axis=1)
@@ -23,9 +22,12 @@ def fill_missing(df):
 
 if __name__ == '__main__':
     train = pd.read_csv('./train.csv')
+    train = train.replace(r'^\s*$', np.nan, regex=True)
     test = pd.read_csv('./test.csv')
-    list_col_drop=['SUBSIDIARY_CD','OTHER AREA SHIP DIV','WEIGHT_UNIT','SOUF_RCV_NO','QTUF_RCV_NO']
-    list_col_map=['Order date','BRAND_CD','PACKING RANK','PRODUCT_CD','DELI_DIV','Ship Mode']
+    test = test.replace(r'^\s*$', np.nan, regex=True)
+
+    list_col_drop=['SUBSIDIARY_CD','OTHER AREA SHIP DIV','WEIGHT_UNIT','HAZARD_FLG','SOUF_RCV_NO','QTUF_RCV_NO','PRODUCT_ASSORT']
+    list_col_map=['Order date','BRAND_CD','INNER_CD','PACKING RANK','PRODUCT_CD','DELI_DIV','Ship Mode']
     #xử lý train
     train=fill_missing(train)
     train=drop_col(train,list_col_drop)
