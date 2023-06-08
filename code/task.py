@@ -22,24 +22,24 @@ class Classify_task:
         self.save_path=config.save_path
         self.dataloader=LoadData(config)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    
+        self.train,self.valid,self.n_input,self.scaler= self.dataloader.load_data(data_path=self.train_path)
+        if self.type_model=='nn':
+            self.base_model = Model(n_inputs=self.n_input,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
+        if self.type_model=='init':
+            self.base_model = Model2(n_inputs=self.n_input,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
+        if self.type_model== 'skip':
+            self.base_model= Skip_Model(n_inputs=self.n_input,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
+        
+        self.loss_function =nn.BCEWithLogitsLoss()
+        self.optimizer = optim.Adam(self.base_model.parameters(), lr=self.learning_rate)
     def training(self):
         if not os.path.exists(self.save_path):
           os.makedirs(self.save_path)
-
-        train,valid,n_input,self.scaler= self.dataloader.load_data(data_path=self.train_path)
-        if self.type_model=='nn':
-            self.base_model = Model(n_inputs=n_input,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
-        if self.type_model=='init':
-            self.base_model = Model2(n_inputs=n_input,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
-        if self.type_model== 'skip':
-            return Skip_Model(n_inputs=n_input,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
-        loss_function =nn.BCEWithLogitsLoss()
-        optimizer = optim.Adam(self.base_model.parameters(), lr=self.learning_rate)
+        
         if os.path.exists(os.path.join(self.save_path, 'last_model.pth')):
             checkpoint = torch.load(os.path.join(self.save_path, 'last_model.pth'))
             self.base_model.load_state_dict(checkpoint['model_state_dict'])
-            optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
             print('loaded the last saved model!!!')
             initial_epoch = checkpoint['epoch'] + 1
             print(f"continue training from epoch {initial_epoch}")
@@ -62,42 +62,42 @@ class Classify_task:
             train_f1 = 0.0
             train_loss = 0.0
             valid_loss = 0.0
-            for inputs, labels in train:
+            for inputs, labels in self.train:
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
-                optimizer.zero_grad()
+                self.optimizer.zero_grad()
                 output = self.base_model(inputs)
-                loss = loss_function(output, labels.float())
+                loss = self.loss_function(output, labels.float())
                 loss.backward()
-                optimizer.step()
+                self.optimizer.step()
                 train_loss += loss.item()
                 train_predictions = (output > 0.5).float()
-                train_f1 += f1_score(labels.cpu(), train_predictions.cpu())
+                train_f1 += f1_score(labels.cpu(), train_predictions.cpu(),average='macro')
 
             with torch.no_grad():
-                for inputs, labels in valid:
+                for inputs, labels in self.valid:
                     inputs, labels = inputs.to(self.device), labels.to(self.device)
                     output = self.base_model(inputs)
-                    loss = loss_function(output, labels.float())
+                    loss = self.loss_function(output, labels.float())
                     valid_loss += loss.item()
                     valid_predictions = (output > 0.5).float()
-                    valid_f1 += f1_score(labels.cpu(), valid_predictions.cpu())
+                    valid_f1 += f1_score(labels.cpu(), valid_predictions.cpu(),average='macro')
 
     
-            train_loss /= len(train)
-            train_f1 /= len(train)
-            valid_loss /= len(valid)
-            valid_f1 /= len(valid)
+            train_loss /= len(self.train)
+            train_f1 /= len(self.train)
+            valid_loss /= len(self.valid)
+            valid_f1 /= len(self.valid)
 
-            print(f"Epoch {epoch + 1}:")
-            print(f"Train Loss: {train_loss:.4f} | Train F1-score: {train_f1:.4f}")
-            print(f"Valid Loss: {valid_loss:.4f} | Valid F1-score: {valid_f1:.4f}")
+            print(f"epoch {epoch + 1}:")
+            print(f"train Loss: {train_loss:.4f} | train f1-score: {train_f1:.4f}")
+            print(f"valid Loss: {valid_loss:.4f} | valid f1-score: {valid_f1:.4f}")
 
 
             # save the model state dict
             torch.save({
                 'epoch': epoch,
                 'model_state_dict': self.base_model.state_dict(),
-                'optimizer_state_dict': optimizer.state_dict(),
+                'optimizer_state_dict': self.optimizer.state_dict(),
                 'valid_f1': valid_f1,
                 'train_f1':train_f1,
                 'train_loss':train_loss,
@@ -113,12 +113,12 @@ class Classify_task:
                 torch.save({
                     'epoch': epoch,
                     'model_state_dict': self.base_model.state_dict(),
-                    'optimizer_state_dict': optimizer.state_dict(),
+                    'optimizer_state_dict': self.optimizer.state_dict(),
                     'valid_f1': valid_f1,
                     'train_f1':train_f1,
                     'train_loss':train_loss,
                     'valid_loss':valid_loss}, os.path.join(self.save_path, 'best_model.pth'))
-                print(f"saved the best model with validation accuracy of {valid_f1:.4f}")
+                print(f"saved the best model with validation f1 score of {valid_f1:.4f}")
             
             # early stopping
             if threshold>=self.patience:
@@ -138,8 +138,8 @@ class Classify_task:
             for inputs in test_data:
                 inputs = inputs.to(self.device)
                 output = self.base_model(inputs)
-                pred_labels.extend(output.argmax(axis=-1).cpu().numpy())
+                pred_labels.extend((output > 0.5).int().cpu().numpy())
                 data = {'index': id, 'label': pred_labels}
         df = pd.DataFrame(data)
         df.to_csv('./submission.csv', index=False)
-
+        print("task done!!!")

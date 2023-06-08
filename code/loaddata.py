@@ -39,7 +39,7 @@ class LoadData:
         y = data['label']
         oversampler = RandomOverSampler(random_state=42)
         X_oversampled, y_oversampled = oversampler.fit_resample(X, y)
-
+        print(y_oversampled.value_counts())
         X_train, X_val, y_train, y_val = train_test_split(X_oversampled, y_oversampled, test_size=0.2, random_state=1)
 
         if does_scale: 
