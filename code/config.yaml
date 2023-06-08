@@ -1,7 +1,7 @@
 train_path: /content/DS103/data/intermediate/train1.pkl
 test_path: /content/Creatures/Valid
 save_path: /content/save/
-type_model: "CNN"
+type_model: NN
 n_hidden: 50
 patience: 5
 n_out: 1

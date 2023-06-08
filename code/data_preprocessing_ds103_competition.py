@@ -9,9 +9,7 @@ def drop_col(df,list_col):
 
 def map_col(df,list_col):
     for col in list_col:
-        mapping={}
-        for i in range(len(df[col].unique())):
-            mapping[i]=df[col].unique()[i]
+        mapping={df[col].unique()[i] : i for i in range(len(df[col].unique()))}
         df[col]=df[col].map(mapping)
         df[col]=df[col].astype('category')
     return df
@@ -31,6 +29,7 @@ def to_datetime(df,col_list):
     df['count_day']=(df['VSD']-df['Order date']).dt.days
     return df
 
+
 if __name__ == '__main__':
     train = pd.read_csv('./train.csv')
     train = train.replace(r'^\s*$',0, regex=True)
@@ -38,9 +37,9 @@ if __name__ == '__main__':
     test = test.replace(r'^\s*$',0, regex=True)
 
     list_col_to_datetime=['Order date','VSD']
-    list_col_to_num=['Consider count hodiday Saturday']
-    list_col_drop=['SUBSIDIARY_CD','WEIGHT_UNIT','HAZARD_FLG','PACK QTY','REASON_CD','SOUF_RCV_NO','QTUF_RCV_NO','PRODUCT_ASSORT']
-    list_col_map=['BRAND_CD','INNER_CD','PACKING RANK','PRODUCT_CD','DELI_DIV','Ship Mode','OTHER AREA SHIP DIV']
+    list_col_to_num=['Consider count hodiday Saturday','OTHER AREA SHIP DIV']
+    list_col_drop=['SUBSIDIARY_CD','INNER_CD','WEIGHT_UNIT','HAZARD_FLG','PRODUCT_CD','PACK QTY','REASON_CD','SOUF_RCV_NO','QTUF_RCV_NO','PRODUCT_ASSORT']
+    list_col_map=['Order date','VSD','BRAND_CD','PACKING RANK','SUPPLIER_CD','DELI_DIV','Ship Mode','OTHER AREA SHIP DIV']
     
     #xử lý train
     train=fill_missing(train)

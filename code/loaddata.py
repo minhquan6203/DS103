@@ -5,6 +5,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import Dataset, DataLoader
+from imblearn.over_sampling import RandomOverSampler
 
 class TrainDataset(Dataset):
     def __init__(self, X, y):
@@ -36,8 +37,10 @@ class LoadData:
         data = pd.read_pickle(data_path)
         X = data.drop('label', axis=1).drop('index',axis=1)
         y = data['label']
+        oversampler = RandomOverSampler(random_state=42)
+        X_oversampled, y_oversampled = oversampler.fit_resample(X, y)
 
-        X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=1)
+        X_train, X_val, y_train, y_val = train_test_split(X_oversampled, y_oversampled, test_size=0.2, random_state=1)
 
         if does_scale: 
             scaler = StandardScaler()
@@ -53,20 +56,15 @@ class LoadData:
         train_dl = DataLoader(train_ds, batch_size=self.batch_size, shuffle=True)
         val_dl = DataLoader(val_ds, batch_size=self.batch_size, shuffle=False)
 
-        return train_dl, val_dl, X_train.shape[1]
+        return train_dl, val_dl, X_train.shape[1],scaler
 
 
-    def load_test_data(self,data_path,does_scale=True):
-
+    def load_test_data(self,data_path,scaler):
         data = pd.read_pickle(data_path)
         X = data.drop('index',axis=1)
-        id = data['index']
-        if does_scale:
-            scaler = StandardScaler()
-            X= scaler.transform(X)
-        else:
-            scaler = None
+        if scaler:
+            X = scaler.transform(X)
         test_ds = TestDataset(X)
         test_dl = DataLoader(test_ds, batch_size=self.batch_size,shuffle=False)
         
-        return test_dl,id
+        return test_dl,data['index']

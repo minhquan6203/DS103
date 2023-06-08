@@ -26,7 +26,7 @@ class Classify_task:
         if not os.path.exists(self.save_path):
           os.makedirs(self.save_path)
 
-        train,valid,n_input = self.dataloader.load_data(data_path=self.train_path)
+        train,valid,n_input,self.scaler= self.dataloader.load_data(data_path=self.train_path)
         self.base_model = Model(n_inputs=n_input,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
         loss_function =nn.BCEWithLogitsLoss()
         optimizer = optim.Adam(self.base_model.parameters(), lr=self.learning_rate)
@@ -117,7 +117,7 @@ class Classify_task:
                 break
 
     def evaluate(self):
-        test_data,id = self.dataloader.load_test_data(data_path=self.test_path)
+        test_data,id = self.dataloader.load_test_data(data_path=self.test_path,scaler=self.scaler)
         if os.path.exists(os.path.join(self.save_path, 'best_model.pth')):
             checkpoint = torch.load(os.path.join(self.save_path, 'best_model.pth'), map_location=self.device)
             self.base_model.load_state_dict(checkpoint['model_state_dict'])
