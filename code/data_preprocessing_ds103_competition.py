@@ -14,6 +14,7 @@ def map_col(df,list_col):
         for i in range(len(df[col].unique())):
             mapping[i]=df[col].unique()[i]
         df[col]=df[col].map(mapping)
+        df[col]=df[col].astype('category')
     return df
 
 def fill_missing(df):
