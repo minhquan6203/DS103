@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import os
 
-from model import Model,Model2,Skip_Model
+from NN_model import Model,Model2,Skip_Model
 from loaddata import LoadData
 from sklearn.metrics import f1_score, confusion_matrix
 import pandas as pd
@@ -20,10 +20,6 @@ class Classify_task:
         self.batch_size=config.batch_size
         self.learning_rate=config.learning_rate
         self.n_out=config.n_out
-        self.gamma = config.gamma
-        self.degree = config.degree
-        self.kernel_type = config.kernel_type
-        self.r = config.r
         self.save_path=config.save_path
         self.dataloader=LoadData(config)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -36,6 +32,10 @@ class Classify_task:
         if self.type_model== 'skip':
             self.base_model= Skip_Model(n_inputs=self.n_input,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
         if self.type_model=='svm':
+            self.gamma = config.gamma
+            self.degree = config.degree
+            self.kernel_type = config.kernel_type
+            self.r = config.r
             self.base_model=get_kernel(self.kernel_type,self.n_input,self.n_out,self.gamma,self.r,self.degree)
         
         self.loss_function =nn.BCEWithLogitsLoss()
