@@ -4,6 +4,7 @@ import torch.optim as optim
 import os
 
 from NN_model import Model,Model2,Skip_Model
+from CNN_model import Text_CNNModel
 from loaddata import LoadData
 from sklearn.metrics import f1_score, confusion_matrix
 import pandas as pd
@@ -32,12 +33,14 @@ class Classify_task:
             self.base_model = Model2(n_inputs=self.d_model,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
         if self.type_model== 'skip':
             self.base_model= Skip_Model(n_inputs=self.d_model,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
+        if self.type_model=='cnn':
+            self.base_model=Text_CNNModel(n_inputs=self.d_model,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
         if self.type_model=='svm':
             self.gamma = config.gamma
             self.degree = config.degree
             self.kernel_type = config.kernel_type
             self.r = config.r
-            self.base_model=get_kernel(self.kernel_type,self.n_input,self.n_out,self.gamma,self.r,self.degree)
+            self.base_model=get_kernel(self.kernel_type,self.d_model,self.n_out,self.gamma,self.r,self.degree)
         self.linear=nn.Linear(self.n_input,self.d_model)
         self.loss_function =nn.BCEWithLogitsLoss()
         self.optimizer = optim.Adam(self.base_model.parameters(), lr=self.learning_rate)
