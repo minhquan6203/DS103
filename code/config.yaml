@@ -1,6 +1,7 @@
 train_path: ./train.pkl
 test_path: ./test.pkl
 save_path: /content/save/
+sampling: True
 type_model: nn
 d_model: 512
 n_hidden: 64

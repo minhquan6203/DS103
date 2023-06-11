@@ -31,18 +31,21 @@ class TestDataset(Dataset):
 class LoadData:
     def __init__(self, config):
         self.batch_size = config.batch_size
+        self.sampling = config.sampling
+        self.scale = config.scale
 
-    def load_data(self,data_path, does_scale=True):
+    def load_data(self,data_path):
 
         data = pd.read_pickle(data_path)
         X = data.drop('label', axis=1).drop('index',axis=1)
         y = data['label']
-        oversampler = RandomOverSampler(random_state=42)
-        X_oversampled, y_oversampled = oversampler.fit_resample(X, y)
-        print(y_oversampled.value_counts())
-        X_train, X_val, y_train, y_val = train_test_split(X_oversampled, y_oversampled, test_size=0.2, random_state=1)
+        if self.sampling:
+            oversampler = RandomOverSampler(random_state=42)
+            X, y = oversampler.fit_resample(X, y)
+        print(y.value_counts())
+        X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=1)
 
-        if does_scale: 
+        if self.scale: 
             scaler = StandardScaler()
             scaler.fit(X_train)
             X_train = scaler.transform(X_train)
