@@ -40,7 +40,7 @@ class Classify_task:
             self.degree = config.degree
             self.kernel_type = config.kernel_type
             self.r = config.r
-            self.base_model=get_kernel(self.kernel_type,self.d_model,self.n_out,self.gamma,self.r,self.degree)
+            self.base_model=get_kernel(self.kernel_type,self.d_model,self.n_out,self.gamma,self.r,self.degree).to(self.device)
         self.linear=nn.Linear(self.n_input,self.d_model)
         self.loss_function =nn.BCEWithLogitsLoss()
         self.optimizer = optim.Adam(self.base_model.parameters(), lr=self.learning_rate)
