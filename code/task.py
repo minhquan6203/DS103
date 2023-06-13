@@ -28,13 +28,13 @@ class Classify_task:
         self.d_model=config.d_model
         print('n_input: ',self.n_input)
         if self.type_model=='nn':
-            self.base_model = Model(n_inputs=self.d_model,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
+            self.base_model = Model(n_inputs=self.n_input,d_model=self.d_model,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
         if self.type_model=='init':
-            self.base_model = Model2(n_inputs=self.d_model,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
+            self.base_model = Model2(n_inputs=self.n_input,d_model=self.d_model,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
         if self.type_model== 'skip':
-            self.base_model= Skip_Model(n_inputs=self.d_model,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
+            self.base_model= Skip_Model(n_inputs=self.n_input,d_model=self.d_model,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
         if self.type_model=='cnn':
-            self.base_model=Text_CNNModel(n_inputs=self.d_model,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
+            self.base_model=Text_CNNModel(n_inputs=self.n_input,d_model=self.d_model,n_hidden=self.n_hidden,n_out=self.n_out).to(self.device)
         if self.type_model=='svm':
             self.gamma = config.gamma
             self.degree = config.degree
@@ -75,7 +75,6 @@ class Classify_task:
             train_loss = 0.0
             valid_loss = 0.0
             for inputs, labels in self.train:
-                inputs=self.linear(inputs)
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
                 self.optimizer.zero_grad()
                 output = self.base_model(inputs)
@@ -88,7 +87,6 @@ class Classify_task:
 
             with torch.no_grad():
                 for inputs, labels in self.valid:
-                    inputs=self.linear(inputs)
                     inputs, labels = inputs.to(self.device), labels.to(self.device)
                     output = self.base_model(inputs)
                     loss = self.loss_function(output, labels.float())
@@ -150,7 +148,6 @@ class Classify_task:
         pred_labels = []
         with torch.no_grad():
             for inputs in test_data:
-                inputs=self.linear(inputs)
                 inputs = inputs.to(self.device)
                 output = self.base_model(inputs)
                 preds=[out[0] for out in (output > 0.5).int().cpu().numpy()]

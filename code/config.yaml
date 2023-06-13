@@ -3,9 +3,9 @@ test_path: ./test.pkl
 save_path: /content/save/
 sampling: True
 scale: True
-type_model: nn
+type_model: cnn
 d_model: 512
-n_hidden: 64
+n_hidden: 32
 patience: 5
 n_out: 1
 batch_size: 256

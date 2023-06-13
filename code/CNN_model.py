@@ -4,11 +4,9 @@ import torch
 import torch.nn.functional as F
 
 class CNNModel(nn.Module):
-    def __init__(self, input_dim, n_hidden, n_out):
+    def __init__(self, input_dim, d_model, n_hidden, n_out):
         super(CNNModel, self).__init__()
-        self.input_dim = input_dim
-        self.n_hidden = n_hidden
-        self.n_out = n_out
+        self.linear = nn.Linear(input_dim,d_model)
 
         self.conv1 = nn.Conv1d(in_channels=input_dim, out_channels=n_hidden, kernel_size=3, padding=1)
         self.relu = nn.ReLU()
@@ -19,7 +17,8 @@ class CNNModel(nn.Module):
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, inp):
-        out = inp.unsqueeze(2) 
+        out = self.linear(inp)
+        out = out.unsqueeze(2) 
         out = self.conv1(out)
         out = self.relu(out)
         out = self.maxpool(out)
@@ -35,21 +34,22 @@ class CNNModel(nn.Module):
 
 
 class Text_CNNModel(nn.Module):
-    def __init__(self, n_inputs, n_hidden, n_out):
+    def __init__(self, n_inputs, d_model,n_hidden, n_out):
         super(Text_CNNModel, self).__init__()
-        self.conv1 = nn.Conv1d(n_inputs, n_hidden, kernel_size=1)
+        self.linear = nn.Linear(n_inputs,d_model)
+        self.conv1 = nn.Conv1d(d_model, n_hidden, kernel_size=1)
         self.bn1 = nn.BatchNorm1d(n_hidden)
         self.relu1 = nn.ReLU()
         
-        self.conv2 = nn.Conv1d(n_inputs, n_hidden, kernel_size=1)
+        self.conv2 = nn.Conv1d(d_model, n_hidden, kernel_size=1)
         self.bn2 = nn.BatchNorm1d(n_hidden)
         self.relu2 = nn.ReLU()
         
-        self.conv3 = nn.Conv1d(n_inputs, n_hidden, kernel_size=1)
+        self.conv3 = nn.Conv1d(d_model, n_hidden, kernel_size=1)
         self.bn3 = nn.BatchNorm1d(n_hidden)
         self.relu3 = nn.ReLU()
         
-        self.conv4 = nn.Conv1d(n_inputs,n_hidden, kernel_size=1)
+        self.conv4 = nn.Conv1d(d_model,n_hidden, kernel_size=1)
         self.bn4 = nn.BatchNorm1d(n_hidden)
         self.relu4 = nn.ReLU()
                 
@@ -59,6 +59,7 @@ class Text_CNNModel(nn.Module):
         
         self.relu = nn.ReLU()
     def forward(self, x):
+        x = self.linear(x)
         x = x.unsqueeze(2)
         x1 = self.relu1(self.bn1((self.conv1(x))))
         x2 = self.relu2(self.bn2((self.conv2(x))))

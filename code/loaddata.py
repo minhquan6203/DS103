@@ -38,6 +38,7 @@ class LoadData:
 
         data = pd.read_pickle(data_path)
         X = data.drop('label', axis=1).drop('index',axis=1)
+        #X = data.drop('label', axis=1).drop(['index','GLOBAL_NO','SOUF_RCV_NO','QTUF_RCV_NO','SUBSIDIARY_CD','PRODUCT_ASSORT','HAZARD_FLG'],axis=1)
         y = data['label']
         if self.sampling:
             oversampler = RandomOverSampler(random_state=42)
