@@ -95,21 +95,22 @@ if __name__ == '__main__':
     corr_list_drop=['SUPPLIER INV AMOUNT','SO QTY','Stock class','count_day','SPECIAL_DIV']
     #xử lý train
     train=fill_weight_unit(train)
-    #train=drop_col(train,list_col_drop)
+
     train=fill_missing(train)
     train=to_datetime(train,list_col_to_datetime)
     train=to_num(train,list_col_to_num)
     train=astype(train,list_astype)
+    train=drop_col(train,list_col_drop)
     train,la_encoder=label_encoder(train)
     #train=astype(train,train.columns.to_list()[1:],'category')
     train.to_pickle('train.pkl')
     #xử lý test
     test=fill_weight_unit(test)
-    #test=drop_col(test,list_col_drop)
     test=fill_missing(test)
     test=to_datetime(test,list_col_to_datetime)
     test=to_num(test,list_col_to_num)
     test=astype(test,list_astype)
+    test=drop_col(test,list_col_drop)
     test=label_encoder_test(test,la_encoder)
     test=fill_missing(test)
     #test=astype(test,test.columns.to_list()[1:],'category')
