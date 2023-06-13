@@ -9,12 +9,10 @@ def drop_col(df,list_col):
         df=df.drop(col,axis=1)
     return df
 
-
-
 def label_encoder(df):
     label_encoder = LabelEncoder()
     for column in df.columns:
-        if df[column].dtype == 'object':
+        if column != 'index' and (df[column].dtype == 'object' or df[column].dtype == 'datetime64[ns]'):
             mixed_values = False
             for value in df[column]:
                 if isinstance(value, str):
@@ -23,12 +21,13 @@ def label_encoder(df):
 
             if mixed_values:
                 df[column] = df[column].astype(str)
-        df[column] = label_encoder.fit_transform(df[column])
-    return df,label_encoder
+            df[column] = label_encoder.fit_transform(df[column])
+    return df, label_encoder
+
 
 def label_encoder_test(df,label_encoder):
     for column in df.columns:
-        if df[column].dtype == 'object':
+        if column != 'index' and (df[column].dtype == 'object' or df[column].dtype == 'datetime64[ns]'):
             mixed_values = False
             for value in df[column]:
                 if isinstance(value, str):
@@ -37,7 +36,7 @@ def label_encoder_test(df,label_encoder):
 
             if mixed_values:
                 df[column] = df[column].astype(str)
-        df[column] = label_encoder.fit_transform(df[column])
+            df[column] = label_encoder.fit_transform(df[column])
     return df
 
 
@@ -87,27 +86,31 @@ if __name__ == '__main__':
     list_col_to_datetime=['Order date','VSD']
     list_col_to_num=['Consider count hodiday Saturday','OTHER AREA SHIP DIV']
     list_astype=['OTHER AREA SHIP DIV']
-    list_col_map=['Order date','VSD','BRAND_CD','WEIGHT_UNIT','PACKING RANK','SUPPLIER_CD','DELI_DIV','Ship Mode']
-    list_col_drop=['INNER_CD','SUBSIDIARY_CD','GLOBAL_NO','SHIP DECISION NO','HAZARD_FLG','PRODUCT_CD','PACK QTY','REASON_CD','SOUF_RCV_NO','QTUF_RCV_NO','PRODUCT_ASSORT']
+    list_col_drop=['ALLOCATION QTY','CUST_CD','GLOBAL_NO','HAZARD_FLG','HEAVY_FLG',
+                   'INNER_CD','IO_UNFIT_FLG','Order date','OTHER AREA SHIP DIV',
+                   'PACKING RANK','PRODUCT ATTRIBUTION','PRODUCT_ASSORT','PRODUCT_CD',
+                   'PURCHASE AMOUNT','QTUF_RCV_NO','Ship Mode','SO_DAY_OF_MONTH','SO_TIME',
+                   'SOUF_RCV_NO','SPECIAL DIV','SPECIFY_PRODUCTION_DAYS','SPECIFY_SHIP_DAYS',
+                   'SUBSIDIARY_CD','SUPPLIER INV AMOUNT','WEIGHT PER PIECE']
     corr_list_drop=['SUPPLIER INV AMOUNT','SO QTY','Stock class','count_day','SPECIAL_DIV']
     #xử lý train
     train=fill_weight_unit(train)
+    #train=drop_col(train,list_col_drop)
     train=fill_missing(train)
     train=to_datetime(train,list_col_to_datetime)
     train=to_num(train,list_col_to_num)
     train=astype(train,list_astype)
     train,la_encoder=label_encoder(train)
-    #train=drop_col(train,list_col_drop)
     #train=astype(train,train.columns.to_list()[1:],'category')
     train.to_pickle('train.pkl')
     #xử lý test
     test=fill_weight_unit(test)
+    #test=drop_col(test,list_col_drop)
     test=fill_missing(test)
     test=to_datetime(test,list_col_to_datetime)
     test=to_num(test,list_col_to_num)
     test=astype(test,list_astype)
     test=label_encoder_test(test,la_encoder)
-    #test=drop_col(test,list_col_drop)
     test=fill_missing(test)
     #test=astype(test,test.columns.to_list()[1:],'category')
     test.to_pickle('test.pkl')
