@@ -24,7 +24,7 @@ class Classify_task:
         self.save_path=config.save_path
         self.dataloader=LoadData(config)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.train,self.valid,self.n_input,self.scaler= self.dataloader.load_data(data_path=self.train_path)
+        self.train,self.valid,self.n_input,self.scaler= self.dataloader.load_data(train_path=self.train_path,test_path=self.test_path)
         self.d_model=config.d_model
         print('n_input: ',self.n_input)
         if self.type_model=='nn':
@@ -41,7 +41,6 @@ class Classify_task:
             self.kernel_type = config.kernel_type
             self.r = config.r
             self.base_model=get_kernel(self.kernel_type,self.d_model,self.n_out,self.gamma,self.r,self.degree).to(self.device)
-        self.linear=nn.Linear(self.n_input,self.d_model)
         self.loss_function =nn.BCEWithLogitsLoss()
         self.optimizer = optim.Adam(self.base_model.parameters(), lr=self.learning_rate)
     def training(self):

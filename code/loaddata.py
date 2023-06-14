@@ -34,17 +34,23 @@ class LoadData:
         self.sampling = config.sampling
         self.scale = config.scale
 
-    def load_data(self,data_path):
+    def load_data(self,train_path,test_path):
 
-        data = pd.read_pickle(data_path)
-        X = data.drop('label', axis=1).drop('index',axis=1)
-        #X = data.drop('label', axis=1).drop(['index','GLOBAL_NO','SOUF_RCV_NO','QTUF_RCV_NO','SUBSIDIARY_CD','PRODUCT_ASSORT','HAZARD_FLG'],axis=1)
-        y = data['label']
+        train = pd.read_pickle(train_path)
+        test = pd.read_pickle(test_path)
+        #X_train = train.drop(['label', 'index'], axis=1).drop(['GLOBAL_NO','SOUF_RCV_NO','QTUF_RCV_NO','SUBSIDIARY_CD','PRODUCT_ASSORT','HAZARD_FLG','PRODUCT_CD'],axis=1)
+        X_train = train.drop(['label', 'index'], axis=1)
+        y_train = train['label']
+        #X_val = test.drop('index',axis=1).drop(['GLOBAL_NO','SOUF_RCV_NO','QTUF_RCV_NO','SUBSIDIARY_CD','PRODUCT_ASSORT','HAZARD_FLG','PRODUCT_CD'],axis=1)
+        X_val = test.drop('index',axis=1)
+        y_val =pd.read_csv('/content/sample_submission.csv')['label']
+        #X = data.drop('label', axis=1).drop(['index','GLOBAL_NO','SOUF_RCV_NO','QTUF_RCV_NO','SUBSIDIARY_CD','PRODUCT_ASSORT','HAZARD_FLG','PRODUCT_CD'],axis=1)
         if self.sampling:
             oversampler = RandomOverSampler(random_state=42)
-            X, y = oversampler.fit_resample(X, y)
-        print(y.value_counts())
-        X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=1)
+            X_train, y_train = oversampler.fit_resample(X_train, y_train)
+        print(X_train.shape)
+        print(y_train.value_counts())
+        print(X_val.shape)
 
         if self.scale: 
             scaler = StandardScaler()
@@ -65,6 +71,7 @@ class LoadData:
 
     def load_test_data(self,data_path,scaler):
         data = pd.read_pickle(data_path)
+        #X = data.drop('index',axis=1).drop(['GLOBAL_NO','SOUF_RCV_NO','QTUF_RCV_NO','SUBSIDIARY_CD','PRODUCT_ASSORT','HAZARD_FLG','PRODUCT_CD'],axis=1)
         X = data.drop('index',axis=1)
         if scaler:
             X = scaler.transform(X)

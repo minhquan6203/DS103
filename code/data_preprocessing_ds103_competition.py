@@ -68,7 +68,7 @@ def to_datetime(df,col_list):
         df[col]=pd.to_datetime(df[col])
     df['count_day']=(df['VSD']-df['Order date']).dt.days
     df['month']=df['Order date'].dt.month
-    df['day']=df['Order date'].dt.day
+    #df['day']=df['Order date'].dt.day
     return df
 
 def fill_weight_unit(df):
