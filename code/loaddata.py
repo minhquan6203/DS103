@@ -65,7 +65,7 @@ class LoadData:
         val_ds = TrainDataset(X_val, y_val)
 
         train_dl = DataLoader(train_ds, batch_size=self.batch_size, shuffle=True)
-        val_dl = DataLoader(val_ds, batch_size=self.batch_size, shuffle=False)
+        val_dl = DataLoader(val_ds, batch_size=self.batch_size, shuffle=True)
 
         return train_dl, val_dl, X_train.shape[1],scaler
 

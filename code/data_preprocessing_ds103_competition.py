@@ -76,7 +76,7 @@ def to_datetime(df,col_list):
     return df
 
 def fill_weight_unit(df):
-    df['WEIGHT_UNIT']=df['WEIGHT_UNIT'].fillna(2)
+    df['WEIGHT_UNIT']=df['WEIGHT_UNIT'].fillna(1)
     df['WEIGHT_UNIT']=df['WEIGHT_UNIT'].replace('g',1)
     df['weight']=df['WEIGHT_UNIT']*df['WEIGHT PER PIECE']*df['SO QTY']
     return df
