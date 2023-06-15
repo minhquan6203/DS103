@@ -17,7 +17,7 @@ class CNNModel(nn.Module):
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, inp):
-        out = self.linear(inp)
+        out = self.dropout(self.linear(inp))
         out = out.unsqueeze(2) 
         out = self.conv1(out)
         out = self.relu(out)
@@ -59,7 +59,7 @@ class Text_CNNModel(nn.Module):
         
         self.relu = nn.ReLU()
     def forward(self, x):
-        x = self.linear(x)
+        x = self.dropout(self.linear(x))
         x = x.unsqueeze(2)
         x1 = self.relu1(self.bn1((self.conv1(x))))
         x2 = self.relu2(self.bn2((self.conv2(x))))

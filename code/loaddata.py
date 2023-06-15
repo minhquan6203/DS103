@@ -48,6 +48,7 @@ class LoadData:
         if self.sampling:
             oversampler = RandomOverSampler(random_state=42)
             X_train, y_train = oversampler.fit_resample(X_train, y_train)
+            X_val, y_val = oversampler.fit_resample(X_val, y_val)
         print(X_train.shape)
         print(y_train.value_counts())
         print(X_val.shape)
