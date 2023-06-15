@@ -121,4 +121,3 @@ if __name__ == '__main__':
     test.to_pickle('test.pkl')
     print(train.info())
     print(test.info())
-    

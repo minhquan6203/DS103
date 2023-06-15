@@ -6,7 +6,7 @@ scale: True
 type_model: cnn
 d_model: 512
 n_hidden: 32
-patience: 10
+patience: 20
 n_out: 1
 batch_size: 256
 learning_rate: 0.01

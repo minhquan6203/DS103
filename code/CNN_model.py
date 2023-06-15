@@ -59,7 +59,7 @@ class Text_CNNModel(nn.Module):
         
         self.relu = nn.ReLU()
     def forward(self, x):
-        x = self.dropout(self.linear(x))
+        x = self.linear(x)
         x = x.unsqueeze(2)
         x1 = self.relu1(self.bn1((self.conv1(x))))
         x2 = self.relu2(self.bn2((self.conv2(x))))
