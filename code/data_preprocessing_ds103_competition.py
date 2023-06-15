@@ -76,7 +76,7 @@ def to_datetime(df,col_list):
     return df
 
 def fill_weight_unit(df):
-    df['WEIGHT_UNIT']=df['WEIGHT_UNIT'].fillna(1)
+    df['WEIGHT_UNIT']=df['WEIGHT_UNIT'].fillna(2)
     df['WEIGHT_UNIT']=df['WEIGHT_UNIT'].replace('g',1)
     df['weight']=df['WEIGHT_UNIT']*df['WEIGHT PER PIECE']*df['SO QTY']
     return df
@@ -97,7 +97,7 @@ if __name__ == '__main__':
                    'PURCHASE AMOUNT','QTUF_RCV_NO','Ship Mode','SO_DAY_OF_MONTH','SO_TIME',
                    'SOUF_RCV_NO','SPECIAL DIV','SPECIFY_PRODUCTION_DAYS','SPECIFY_SHIP_DAYS',
                    'SUBSIDIARY_CD','SUPPLIER INV AMOUNT','WEIGHT PER PIECE','WEIGHT_UNIT']
-    corr_list_drop=['SUPPLIER INV AMOUNT','SO QTY','Stock class','count_day','SPECIAL_DIV']
+    #clist_col_drop=['GLOBAL_NO','SOUF_RCV_NO','QTUF_RCV_NO','SUBSIDIARY_CD','PRODUCT_ASSORT','HAZARD_FLG','PRODUCT_CD']
     #xử lý train
     train=fill_weight_unit(train)
     train=fill_missing(train)
