@@ -6,11 +6,11 @@ scale: True
 type_model: cnn
 d_model: 512
 n_hidden: 32
-patience: 20
+patience: 100
 n_out: 1
 batch_size: 256
 learning_rate: 0.01
-num_epochs: 100
+num_epochs: 300
 
 #if model is svm
 gamma: 0.1
