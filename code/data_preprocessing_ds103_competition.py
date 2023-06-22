@@ -9,35 +9,24 @@ def drop_col(df,list_col):
         df=df.drop(col,axis=1)
     return df
 
-def label_encoder(df):
-    label_encoder = LabelEncoder()
-    for column in df.columns:
-        if column != 'index' and (df[column].dtype == 'object' or df[column].dtype == 'datetime64[ns]'):
+def lb_encoder(df_train,df_test):
+    for column in df_train.columns:
+        if column != 'index' and (df_train[column].dtype == 'object' or df_train[column].dtype == 'datetime64[ns]'):
             mixed_values = False
-            for value in df[column]:
+            for value in df_train[column]:
                 if isinstance(value, str):
                     mixed_values = True
                     break
 
             if mixed_values:
-                df[column] = df[column].astype(str)
-            df[column] = label_encoder.fit_transform(df[column])
-    return df, label_encoder
+                df_train[column] = df_train[column].astype(str)
+                df_test[column] = df_test[column].astype(str)
+            label_encoder = LabelEncoder()
+            label_encoder.fit(pd.concat([df_train[column],df_test[column]]))
+            df_train[column]=label_encoder.transform(df_train[column])
+            df_test[column]=label_encoder.transform(df_test[column])
 
-
-def label_encoder_test(df,label_encoder):
-    for column in df.columns:
-        if column != 'index' and (df[column].dtype == 'object' or df[column].dtype == 'datetime64[ns]'):
-            mixed_values = False
-            for value in df[column]:
-                if isinstance(value, str):
-                    mixed_values = True
-                    break
-
-            if mixed_values:
-                df[column] = df[column].astype(str)
-            df[column] = label_encoder.fit_transform(df[column])
-    return df
+    return df_train,df_test
 
 
 def map_col_test(df,list_col,map_list):
@@ -100,24 +89,25 @@ if __name__ == '__main__':
     #clist_col_drop=['GLOBAL_NO','SOUF_RCV_NO','QTUF_RCV_NO','SUBSIDIARY_CD','PRODUCT_ASSORT','HAZARD_FLG','PRODUCT_CD']
     #xử lý train
     train=fill_weight_unit(train)
-    train=fill_missing(train)
+
     train=to_datetime(train,list_col_to_datetime)
     train=to_num(train,list_col_to_num)
     train=astype(train,list_astype)
     train=drop_col(train,list_col_drop)
-    train,la_encoder=label_encoder(train)
+    train=fill_missing(train)
     #train=astype(train,train.columns.to_list()[1:],'category')
-    train.to_pickle('train.pkl')
+
     #xử lý test
     test=fill_weight_unit(test)
-    test=fill_missing(test)
     test=to_datetime(test,list_col_to_datetime)
     test=to_num(test,list_col_to_num)
     test=astype(test,list_astype)
     test=drop_col(test,list_col_drop)
-    test=label_encoder_test(test,la_encoder)
     test=fill_missing(test)
+    train,test=lb_encoder(train,test)
+    
     #test=astype(test,test.columns.to_list()[1:],'category')
     test.to_pickle('test.pkl')
+    train.to_pickle('train.pkl')
     print(train.info())
     print(test.info())
